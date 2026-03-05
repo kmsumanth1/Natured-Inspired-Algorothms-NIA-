@@ -1,9 +1,11 @@
  =================Hybrid AI Soil Classification & Fertility System=========================
+ =================Hybrid AI Soil Classification & Fertility System=========================
 
 This project is a full-stack AI-based soil analysis system that predicts the type of soil and its fertility level using both soil images and nutrient parameters. The system combines deep learning for soil image classification with machine learning models for fertility prediction, providing results through an interactive web application.
 
 The main goal of this system is to assist farmers, agricultural researchers, and soil analysts in understanding soil conditions more efficiently and making better crop-related decisions.
 
+ ==================Features=====================
  ==================Features=====================
 
  Soil Type Classification using a deep learning CNN model
@@ -20,6 +22,8 @@ The main goal of this system is to assist farmers, agricultural researchers, and
 
 ======================Technologies Used=========================
 =========Frontend=========
+======================Technologies Used=========================
+=========Frontend=========
 
 React (Vite)
 
@@ -28,9 +32,11 @@ Tailwind CSS
 Recharts
 
 ===========Backend================
+===========Backend================
 
 Spring Boot (Java)
 
+===========AI / Machine Learning================
 ===========AI / Machine Learning================
 
 Python
@@ -42,9 +48,11 @@ Scikit-learn
 FastAPI
 
 ==================Database====================
+==================Database====================
 
 MySQL
 
+==================AI Techniques================
 ==================AI Techniques================
 
 Convolutional Neural Networks (CNN)
@@ -57,6 +65,7 @@ Elephant Herd Optimization (EHO)
 
 SMOTE for handling class imbalance
 
+====================== System Architecture===================
 ====================== System Architecture===================
 
 The system is built using a three-layer architecture:
@@ -86,6 +95,7 @@ Predicts soil fertility using machine learning
 Sends results back to the backend
 
 ======================= Soil Types Supported==================
+======================= Soil Types Supported==================
 
 The system currently classifies the following soil types:
 
@@ -103,6 +113,25 @@ Red Soil
 
 Yellow Soil
 
+<<<<<<< HEAD
+ How to Run the Project
+1️. Start the AI Model Service
+cd SoilQuality-EHO/ml_service
+py -3.11 -m uvicorn app:app --reload --port 8000 or python  -m uvicorn app:app --reload --port 8000
+2️. Run Spring Boot Backend
+cd nia-backend
+mvn spring-boot:run
+3️. Start React Frontend
+cd nia-frontend-clean
+npm install
+npm run dev
+
+Open the application in your browser:
+
+http://localhost:5173
+===================== Model Performance=======================
+=======
+
  How to Run the Project
 1️. Start the AI Model Service
 cd SoilQuality-EHO/ml_service
@@ -119,6 +148,7 @@ Open the application in your browser:
 
 http://localhost:5173
  Model Performance
+>>>>>>> 1f9c5754281afeb48e91c5498cac555355dfd9a5
 
 CNN soil classification model trained using MobileNetV2 transfer learning
 
@@ -126,6 +156,7 @@ Achieved ~80–83% validation accuracy
 
 Model performance improved using fine-tuning and class balancing techniques
 
+ ==================Future Improvements========================
  ==================Future Improvements========================
 
 Possible enhancements for this system include:
@@ -138,6 +169,7 @@ Integration with IoT soil sensors
 
 Larger dataset for improved model accuracy
 
+ =========================Author=============================
  =========================Author=============================
 
 KM Sumanth
