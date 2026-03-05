@@ -103,21 +103,7 @@ Red Soil
 
 Yellow Soil
 
- How to Run the Project
-1️. Start the AI Model Service
-cd SoilQuality-EHO/ml_service
-py -3.11 -m uvicorn app:app --reload --port 8000
-2️. Run Spring Boot Backend
-cd nia-backend
-mvn spring-boot:run
-3️. Start React Frontend
-cd nia-frontend-clean
-npm install
-npm run dev
 
-Open the application in your browser:
-
-http://localhost:5173
  Model Performance
 
 CNN soil classification model trained using MobileNetV2 transfer learning
