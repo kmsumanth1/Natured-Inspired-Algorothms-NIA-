@@ -103,6 +103,7 @@ Red Soil
 
 Yellow Soil
 
+<<<<<<< HEAD
  How to Run the Project
 1️. Start the AI Model Service
 cd SoilQuality-EHO/ml_service
@@ -119,6 +120,10 @@ Open the application in your browser:
 
 http://localhost:5173
 ===================== Model Performance=======================
+=======
+
+ Model Performance
+>>>>>>> 1f9c5754281afeb48e91c5498cac555355dfd9a5
 
 CNN soil classification model trained using MobileNetV2 transfer learning
 
