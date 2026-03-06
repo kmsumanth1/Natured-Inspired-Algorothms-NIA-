@@ -83,9 +83,9 @@ const SOIL_COLORS = {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:8080/api/predict",
-        formData
-      );
+  "https://soil-ai-backend.onrender.com/predict",
+  formData
+);
       setResult(response.data);
       fetchHistory();
     } catch (error) {
