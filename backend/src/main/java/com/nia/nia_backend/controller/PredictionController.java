@@ -5,7 +5,11 @@ import com.nia.nia_backend.entity.Prediction;
 import com.nia.nia_backend.repository.PredictionRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.core.io.ByteArrayResource;
@@ -14,7 +18,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
-import java.net.http.HttpHeaders;
 
 @RestController
 @RequestMapping("/api")
@@ -27,7 +30,6 @@ public class PredictionController {
     @Autowired
     private PredictionRepository predictionRepository;
 
-    // 🔥 1️⃣ PREDICT ENDPOINT
     @PostMapping("/predict")
     public ResponseEntity<?> predict(
             @RequestParam("file") MultipartFile file,
@@ -59,7 +61,6 @@ public class PredictionController {
 
         PredictionResponse mlResult = response.getBody();
 
-        // 🔥 SAVE TO DATABASE
         Prediction prediction = new Prediction();
         prediction.setSoilType(mlResult.getSoil_type());
         prediction.setFertility(mlResult.getFertility());
@@ -70,9 +71,8 @@ public class PredictionController {
         return ResponseEntity.ok(mlResult);
     }
 
-    // 🔥 2️⃣ HISTORY ENDPOINT
     @GetMapping("/history")
     public ResponseEntity<?> getHistory() {
         return ResponseEntity.ok(predictionRepository.findAll());
     }
-} 
+}
