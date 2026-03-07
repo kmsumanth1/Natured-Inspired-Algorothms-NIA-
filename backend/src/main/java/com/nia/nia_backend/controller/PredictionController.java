@@ -37,7 +37,7 @@ public class PredictionController {
     ) throws IOException {
 
         RestTemplate restTemplate = new RestTemplate();
-        String lUrl = "http://localhost:8000/predict";
+        String lUrl = "https://soil-ai-api.onrender.com/predict";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
