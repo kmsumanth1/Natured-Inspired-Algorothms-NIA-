@@ -1,9 +1,12 @@
 package com.nia.nia_backend.dto;
 
+import java.util.List;
+
 public class PredictionResponse {
 
     private String soil_type;
     private String fertility;
+    private List<List<Double>> prediction; // optional
 
     public PredictionResponse() {}
 
@@ -21,5 +24,13 @@ public class PredictionResponse {
 
     public void setFertility(String fertility) {
         this.fertility = fertility;
+    }
+
+    public List<List<Double>> getPrediction() {
+        return prediction;
+    }
+
+    public void setPrediction(List<List<Double>> prediction) {
+        this.prediction = prediction;
     }
 }

@@ -1,8 +1,5 @@
 fastapi
 uvicorn
-tensorflow==2.13.0
+tensorflow-cpu
 numpy
-joblib
 pillow
-python-multipart
-scikit-learn

@@ -5,11 +5,7 @@ import com.nia.nia_backend.entity.Prediction;
 import com.nia.nia_backend.repository.PredictionRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.core.io.ByteArrayResource;
@@ -30,6 +26,9 @@ public class PredictionController {
     @Autowired
     private PredictionRepository predictionRepository;
 
+    // ✅ Your deployed ML API
+    private final String ML_API_URL = "https://soil-ai-api.onrender.com/predict";
+
     @PostMapping("/predict")
     public ResponseEntity<?> predict(
             @RequestParam("file") MultipartFile file,
@@ -37,11 +36,11 @@ public class PredictionController {
     ) throws IOException {
 
         RestTemplate restTemplate = new RestTemplate();
-        String lUrl = "https://soil-ai-api.onrender.com/predict";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
+        // ✅ Convert file
         ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
             @Override
             public String getFilename() {
@@ -49,6 +48,7 @@ public class PredictionController {
             }
         };
 
+        // ✅ Request body
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", resource);
         body.add("npk", npk);
@@ -56,11 +56,19 @@ public class PredictionController {
         HttpEntity<MultiValueMap<String, Object>> requestEntity =
                 new HttpEntity<>(body, headers);
 
+        // ✅ Call ML API
         ResponseEntity<PredictionResponse> response =
-                restTemplate.postForEntity(lUrl, requestEntity, PredictionResponse.class);
+                restTemplate.postForEntity(ML_API_URL, requestEntity, PredictionResponse.class);
+
+        // ✅ Error handling
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body("ML service error");
+        }
 
         PredictionResponse mlResult = response.getBody();
 
+        // ✅ Save to DB
         Prediction prediction = new Prediction();
         prediction.setSoilType(mlResult.getSoil_type());
         prediction.setFertility(mlResult.getFertility());
