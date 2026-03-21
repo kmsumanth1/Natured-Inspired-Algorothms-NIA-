@@ -10,11 +10,7 @@ app = FastAPI()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(BASE_DIR, "../soil_image_model/soil_image_model.keras")
 
-model = tf.keras.models.load_model(
-    model_path,
-    compile=False,
-    safe_mode=False
-)
+model = tf.keras.models.load_model(model_path, compile=False)
 
 @app.get("/")
 def home():
