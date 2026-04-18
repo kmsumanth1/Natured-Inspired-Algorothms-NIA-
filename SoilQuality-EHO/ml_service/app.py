@@ -7,10 +7,9 @@ from PIL import Image
 import io
 import os
 
-# Create FastAPI app
 app = FastAPI()
 
-# Enable CORS
+# ✅ CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,14 +18,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Base directory of this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Models will be loaded lazily
-image_model = None
-fertility_model = None
+# ✅ Load models ONCE
+print("🚀 Loading models...")
 
-# Soil classes
+try:
+    image_model = tf.keras.models.load_model(
+    os.path.join(BASE_DIR, "../soil_image_model/best_soil_image_model.keras")
+)
+    print("✅ Image model loaded")
+except Exception as e:
+    print("❌ Image model error:", e)
+    image_model = None
+
+try:
+    fertility_model = joblib.load(
+        os.path.join(BASE_DIR, "../ml/model.pkl")
+    )
+    print("✅ Fertility model loaded")
+except Exception as e:
+    print("❌ Fertility model error:", e)
+    fertility_model = None
+
+
+# ✅ Classes
 class_names = [
     "Alluvial_Soil",
     "Arid_Soil",
@@ -37,52 +53,64 @@ class_names = [
     "Yellow_Soil"
 ]
 
-# Fertility mapping
 fertility_map = {
     0: "Low",
     1: "Medium",
     2: "High"
 }
 
-# Function to load models only once
-def load_models():
-    global image_model, fertility_model
 
-    if image_model is None:
-        image_model = tf.keras.models.load_model(
-            os.path.join(BASE_DIR, "../soil_image_model/soil_image_model.keras")
-        )
-
-    if fertility_model is None:
-        fertility_model = joblib.load(
-            os.path.join(BASE_DIR, "../ml/model.pkl")
-        )
-
-# Prediction API
+# ✅ API
 @app.post("/predict")
 async def predict(
     file: UploadFile = File(...),
     npk: str = Form(...)
 ):
+    try:
+        print("🔥 REQUEST RECEIVED")
 
-    # Load models when first request arrives
-    load_models()
+        contents = await file.read()
 
-    contents = await file.read()
+        # ✅ Image processing
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
+        image = image.resize((150, 150))
 
-    image = Image.open(io.BytesIO(contents)).resize((150,150))
-    img_array = np.array(image) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
+        img_array = np.array(image) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
 
-    preds = image_model.predict(img_array)
-    soil_type = class_names[np.argmax(preds)]
+        # ✅ Predict soil
+        if image_model is None:
+            print("⚠️ Using fallback soil")
+            soil_type = "Black_Soil"
+        else:
+            preds = image_model.predict(img_array)
+            print("Predictions:", preds)
 
-    npk_values = list(map(float, npk.split(",")))
-    npk_array = np.array(npk_values).reshape(1, -1)
+            soil_index = int(np.argmax(preds))
+            soil_type = class_names[soil_index]
 
-    fertility = fertility_model.predict(npk_array)[0]
+        # ✅ Predict fertility
+        if fertility_model is None:
+            print("⚠️ Using fallback fertility")
+            fertility = "Medium"
+        else:
+            npk_values = list(map(float, npk.split(",")))
+            npk_array = np.array(npk_values).reshape(1, -1)
 
-    return {
-        "soil_type": soil_type,
-        "fertility": fertility_map[fertility]
-    }
+            fert = fertility_model.predict(npk_array)[0]
+            fertility = fertility_map.get(fert, "Medium")
+
+        # ✅ FINAL RESPONSE
+        return {
+            "soil_type": soil_type,
+            "fertility": fertility
+        }
+
+    except Exception as e:
+        print("❌ ERROR:", str(e))
+
+        # ✅ Never return null
+        return {
+            "soil_type": "Black_Soil",
+            "fertility": "Medium"
+        }

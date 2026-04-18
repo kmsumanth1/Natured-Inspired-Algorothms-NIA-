@@ -1,12 +1,13 @@
 import tensorflow as tf
-import h5py
 
-# Load model manually (bypass config issue)
+# Force load ignoring config
 model = tf.keras.models.load_model(
     "best_soil_image_model.keras",
     compile=False,
     safe_mode=False
 )
 
-print("✅ Model loaded successfully!")
-model.summary()
+# Save in old stable format
+model.save("fixed_model.h5")
+
+print("✅ Converted and saved!")

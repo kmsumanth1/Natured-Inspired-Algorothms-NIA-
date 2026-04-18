@@ -13,8 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.io.IOException;
-
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = {
@@ -26,59 +24,71 @@ public class PredictionController {
     @Autowired
     private PredictionRepository predictionRepository;
 
-    // ✅ Your deployed ML API
-    private final String ML_API_URL = "https://soil-ai-api.onrender.com/predict";
+    // ✅ FastAPI URL
+    private final String ML_API_URL = "http://127.0.0.1:8000/predict";
 
     @PostMapping("/predict")
     public ResponseEntity<?> predict(
             @RequestParam("file") MultipartFile file,
             @RequestParam("npk") String npk
-    ) throws IOException {
+    ) {
 
-        RestTemplate restTemplate = new RestTemplate();
+        try {
+            RestTemplate restTemplate = new RestTemplate();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            // ✅ Headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        // ✅ Convert file
-        ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
-            @Override
-            public String getFilename() {
-                return file.getOriginalFilename();
+            // ✅ Convert file
+            ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return file.getOriginalFilename();
+                }
+            };
+
+            // ✅ Body
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", resource);
+            body.add("npk", npk);
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity =
+                    new HttpEntity<>(body, headers);
+
+            // ✅ CALL FASTAPI (FIXED)
+            ResponseEntity<PredictionResponse> response =
+                    restTemplate.postForEntity(ML_API_URL, requestEntity, PredictionResponse.class);
+
+            System.out.println("🔥 ML RESPONSE: " + response.getBody());
+
+            PredictionResponse mlResult = response.getBody();
+
+            // ❌ fallback if null
+            if (mlResult == null) {
+                return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                        .body("ML returned null");
             }
-        };
 
-        // ✅ Request body
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", resource);
-        body.add("npk", npk);
+            // ✅ Save to DB
+            Prediction prediction = new Prediction();
+            prediction.setSoilType(mlResult.getSoil_type());
+            prediction.setFertility(mlResult.getFertility());
+            prediction.setNpkValues(npk);
 
-        HttpEntity<MultiValueMap<String, Object>> requestEntity =
-                new HttpEntity<>(body, headers);
+            predictionRepository.save(prediction);
 
-        // ✅ Call ML API
-        ResponseEntity<PredictionResponse> response =
-                restTemplate.postForEntity(ML_API_URL, requestEntity, PredictionResponse.class);
+            return ResponseEntity.ok(mlResult);
 
-        // ✅ Error handling
-        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
-                    .body("ML service error");
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Backend Error: " + e.getMessage());
         }
-
-        PredictionResponse mlResult = response.getBody();
-
-        // ✅ Save to DB
-        Prediction prediction = new Prediction();
-        prediction.setSoilType(mlResult.getSoil_type());
-        prediction.setFertility(mlResult.getFertility());
-        prediction.setNpkValues(npk);
-
-        predictionRepository.save(prediction);
-
-        return ResponseEntity.ok(mlResult);
     }
 
+    // ✅ HISTORY
     @GetMapping("/history")
     public ResponseEntity<?> getHistory() {
         return ResponseEntity.ok(predictionRepository.findAll());
