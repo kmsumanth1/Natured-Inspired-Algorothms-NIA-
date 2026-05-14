@@ -1,5 +1,3 @@
-package main.java.com.nia.nia_backend.service;
-
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
