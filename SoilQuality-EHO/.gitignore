@@ -5,3 +5,7 @@ __pycache__/
 *.pyd
 .env
 .ipynb_checkpoints
+soil_image_model/dataset/
+venv/
+__pycache__/
+*.pyc
